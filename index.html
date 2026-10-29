@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jogo dos Erros – Segurança do Trabalho</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1320;--pn:#14213a;--ink:#eef2f8;--mu:#9fb0cc;--y:#ffcc00;--r:#e5484d;--g:#2fbf71;--b:#2f7de1;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1320}}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(1000px 500px at 50% -5%,#22365c,var(--bg) 65%) fixed;color:var(--ink);font:16px/1.45 Barlow,system-ui,sans-serif}
+h1,h2,b,button,.ft{font-family:"Barlow Condensed",Impact,sans-serif}
+.app{max-width:1180px;margin:0 auto;padding:12px}
+.banner{background:var(--y);color:#111;border:4px solid #111;border-radius:6px;text-align:center;padding:2px 10px 8px;position:relative;box-shadow:0 8px 24px #0008}
+.banner:before,.banner:after{content:"";display:block;height:12px;margin:0 -10px;background:repeating-linear-gradient(-45deg,#111 0 14px,var(--y) 14px 28px)}
+.banner:before{margin-bottom:6px}.banner:after{margin-top:6px;display:none}
+.banner h1{margin:0;font-size:clamp(34px,7vw,68px);line-height:1;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+.banner p{margin:0;font-weight:600;font-size:clamp(14px,2.4vw,19px)}
+.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:14px;margin-top:14px;align-items:start}
+.scene{position:relative;border:6px solid #111;outline:3px solid var(--y);border-radius:6px;overflow:hidden;background:#0a0f18;box-shadow:0 14px 40px #000a}
+svg{display:block;width:100%;height:auto}
+#svg{cursor:crosshair}
+.hit{fill:transparent}
+.cap{background:#111;color:var(--y);font:800 clamp(16px,2.6vw,22px) "Barlow Condensed",sans-serif;text-align:center;padding:8px;margin-top:3px;letter-spacing:.04em;border-radius:0 0 6px 6px;text-transform:uppercase}
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hud div{background:var(--pn);border-radius:6px;padding:6px 10px;border-bottom:3px solid var(--y)}
+.hud small{display:block;color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.hud b{font-size:26px;font-weight:800;line-height:1.1}
+.bar{height:10px;background:#050a12;border-radius:5px;overflow:hidden;margin:10px 0 4px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--g),var(--y),var(--r));transition:clip-path .5s}
+.lab{color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.chip{display:flex;gap:8px;align-items:center;background:var(--pn);border-radius:6px;padding:5px 8px;font-size:14px;min-height:34px;opacity:.7}
+.chip b{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:#0b1320;font-size:15px}
+.chip.on{opacity:1;background:#12372a;border:1px solid var(--g)}.chip.on b{background:var(--g);color:#05140c}
+.info{background:var(--pn);border-left:8px solid var(--b);border-radius:6px;padding:10px 14px;min-height:112px}
+.info h2{margin:0 0 4px;font-size:24px;line-height:1.1}
+.info p{margin:0;font-size:15px}
+.nr{display:inline-block;background:var(--b);color:#fff;font:600 13px Barlow,sans-serif;padding:1px 8px;border-radius:3px;margin-right:6px}
+.info.good{border-color:var(--g)}.info.good .nr{background:var(--g)}
+.info.bad{border-color:var(--r)}.info.bad .nr{background:var(--r)}
+.tools{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button{font-weight:800;font-size:19px;letter-spacing:.04em;background:var(--y);color:#111;border:0;border-radius:6px;padding:10px 20px;cursor:pointer;text-transform:uppercase;transition:transform .12s}
+button:active{transform:scale(.96)}button.alt{background:var(--pn);color:var(--ink);flex:1;padding:10px 12px;font-size:16px}
+button:focus-visible{outline:3px solid #fff;outline-offset:2px}button:disabled{opacity:.4;cursor:default}
+.overlay{position:absolute;inset:0;background:rgba(8,12,20,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:12px}
+.overlay h1{font-size:clamp(36px,7vw,64px);line-height:.95;margin:0;font-weight:800;text-transform:uppercase}
+.overlay p{max-width:520px;color:var(--mu);margin:0}
+.stars{font-size:40px;color:var(--y);letter-spacing:6px}
+.badge{width:74px;height:74px}
+.pulse{animation:p 1s ease-in-out 4}@keyframes p{50%{stroke-width:7}}
+.shake{animation:s .35s}@keyframes s{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@media (prefers-reduced-motion:reduce){.pulse,.shake{animation:none}}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.scene.ovon #svg{display:none}.overlay{position:relative;min-height:400px}.app{padding:8px}}
+@media(max-width:480px){.hud b{font-size:22px}.hud div{padding:5px 7px}.chips{grid-template-columns:1fr}.banner{border-width:3px}}
+
+:root{--bg:#0b1e2b;--pn:#123247;--ink:#d9fff4;--mu:#8fc9bb;--y:#ffe45c;--g:#3ddc6b;--r:#e23b3b;--b:#7fd1ff;--m:#7ff0d0}
+html,body,h1,h2,b,button,.cap,.nr,.chip,.lab{font-family:"Press Start 2P","Courier New",monospace!important}
+html,body{font-size:10px;line-height:1.9;background:radial-gradient(900px 520px at 50% 0,#17445c,var(--bg) 70%) fixed}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background:radial-gradient(ellipse at center,transparent 45%,rgba(2,8,20,.55) 100%)}
+.banner{background:#0f2a3a;color:var(--y);border:3px solid var(--y);border-radius:0;box-shadow:0 0 0 3px #000,0 0 50px rgba(127,240,208,.3)}
+.banner h1{font-size:clamp(18px,4.6vw,40px);line-height:1.3;text-shadow:3px 3px 0 #000;padding:6px 0 2px}
+.banner p{color:var(--m);font-size:clamp(7px,1.6vw,10px);text-shadow:2px 2px 0 #000;margin-top:4px}
+.scene{border:3px solid #000;outline:2px solid rgba(255,210,60,.7);border-radius:0;box-shadow:0 0 0 2px rgba(255,210,60,.55),0 0 60px rgba(127,240,208,.35),0 0 140px rgba(0,0,0,.6)}
+.scene:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0 1px,transparent 1px 3px)}
+.cap{font-size:clamp(8px,1.8vw,11px);color:var(--m);background:#000;border-radius:0;text-shadow:2px 2px 0 #000;letter-spacing:0;padding:10px 6px}
+.hud div,.chip,.info{border-radius:0;box-shadow:0 0 0 2px #000}
+.hud div{border-bottom:3px solid var(--m)}
+.hud small{font-size:7px;letter-spacing:0;color:var(--mu)}
+.hud b{font-size:16px;font-weight:400;text-shadow:2px 2px 0 #000}
+.bar{border-radius:0;box-shadow:0 0 0 2px #000}.lab{font-size:7px;letter-spacing:0}
+.chip{font-size:8px;line-height:1.5;min-height:38px}.chip b{border-radius:0;font-size:9px;width:22px;height:22px;font-weight:400}
+.chip.on{border-color:var(--g)}.chip.on b{background:var(--g)}
+.info{min-height:130px;border-left-width:6px}.info h2{font-size:12px;line-height:1.5;font-weight:400;text-shadow:2px 2px 0 #000;color:var(--y)}.info p{font-size:9px;line-height:1.8}
+.nr{font-size:7px;font-weight:400;border-radius:0;padding:3px 6px;margin-right:6px;color:#05140c}.info.bad .nr{color:#fff}
+button{font-size:11px;font-weight:400;letter-spacing:0;border-radius:0;color:#1b2433;background:var(--y);box-shadow:0 4px 0 #b8972a,0 0 0 2px #000;padding:12px 16px;text-transform:uppercase}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #b8972a,0 0 0 2px #000}
+button.alt{font-size:8px;background:var(--pn);color:var(--m);box-shadow:0 4px 0 #0a1e2c,0 0 0 2px #000;padding:11px 8px}
+.overlay{background:rgba(5,14,24,.94)}.overlay h1{font-size:clamp(18px,4.4vw,34px);line-height:1.4;font-weight:400;color:var(--y);text-shadow:3px 3px 0 #000}
+.overlay p{font-size:9px;line-height:1.9;color:var(--m)}.stars{font-size:30px;text-shadow:3px 3px 0 #000}
+.pulse{stroke:var(--y)}
+@media(max-width:480px){.hud b{font-size:13px}.hud small{font-size:6px}.info p{font-size:8px}.banner h1{font-size:17px}button.alt{font-size:7px;padding:10px 4px}}
+#cv{display:none;width:100%;height:auto;touch-action:none;cursor:ew-resize}
+.overlay{background:radial-gradient(circle at 50% 22%,#1d5170,#050e18 75%)}
+.overlay:before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:repeating-linear-gradient(-45deg,#111 0 10px,var(--y) 10px 20px)}
+.fl span{display:inline-block;font-size:34px;margin:0 6px;animation:bob 1.6s ease-in-out infinite}
+.fl span:nth-child(2){animation-delay:.2s}.fl span:nth-child(3){animation-delay:.4s}.fl span:nth-child(4){animation-delay:.6s}.fl span:nth-child(5){animation-delay:.8s}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.mini{font-size:7px!important;color:var(--mu)!important}
+.hud div{background:linear-gradient(180deg,#17415a,var(--pn))}
+.chip b{font-size:15px}.chip.on{background:linear-gradient(90deg,#12503a,#12372a)}
+@media(max-width:860px){.scene.ovon #cv{display:none!important}}
+@media (prefers-reduced-motion:reduce){.fl span{animation:none}}
+.scene:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 90px rgba(0,0,0,.5)}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="banner"><h1>Jogo dos Erros</h1><p>Segurança do Trabalho · Normas Regulamentadoras</p></div>
+<div class="grid">
+<section>
+<div class="scene ovon" id="scene"><svg id="svg" viewBox="0 0 800 450" role="img" aria-label="Cena para inspeção"></svg><canvas id="cv" width="800" height="450" aria-label="Chuva de EPIs"></canvas><div class="overlay" id="ov"></div></div>
+<div class="cap" id="cap">Quantos erros você encontrou?</div>
+</section>
+<aside>
+<div class="hud"><div><small>Fase</small><b id="hLv">1/2</b></div><div><small>Pontos</small><b id="hSc">0</b></div><div><small id="lT">Tempo</small><b id="hT">0</b></div><div><small>Vidas</small><b id="hL" style="color:var(--r)">♥♥♥</b></div></div>
+<div class="bar"><i id="risk"></i></div><div class="lab">Nível de risco no local</div>
+<div class="chips" id="chips"></div>
+<div class="info" id="info"><h2>Sua missão</h2><p>Clique nos perigos que violam as Normas Regulamentadoras. Atenção: apontar algo correto custa uma vida.</p></div>
+<div class="tools"><button class="alt" id="bHint">Dica (2)</button><button class="alt" id="bSkip">Reiniciar</button><button class="alt" id="bMus">♪ Música (M)</button></div>
+</aside>
+</div>
+</div>
+<script>
+const $=i=>document.getElementById(i),K='#1c1c1c',SK='#f0b98d';
+const ol=(d,w,c)=>`<path d="${d}" fill="none" stroke="${K}" stroke-width="${w+4}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+const P=(x,y,o={})=>{const c=o.c||'#e8742a',p=o.p||'#2d5a8c',[a,b]=o.h||[[-18,18],[18,18]];
+return `<g transform="translate(${x},${y})">${ol('M-6 24V50',9,p)}${ol('M6 24V50',9,p)}<rect x="-13" y="48" width="14" height="7" rx="3" fill="#3b2a1d" stroke="${K}" stroke-width="2"/><rect x="0" y="48" width="14" height="7" rx="3" fill="#3b2a1d" stroke="${K}" stroke-width="2"/>
+<rect x="-13" y="-3" width="26" height="30" rx="8" fill="${c}" stroke="${K}" stroke-width="2.5"/>${o.nb?'':'<rect x="-13" y="9" width="26" height="4" fill="#e9f35a"/>'}
+${ol(`M-11 5Q${a[0]-4} ${a[1]-10} ${a[0]} ${a[1]}`,6,c)}${ol(`M11 5Q${b[0]+4} ${b[1]-10} ${b[0]} ${b[1]}`,6,c)}<circle cx="${a[0]}" cy="${a[1]}" r="4.5" fill="${SK}" stroke="${K}" stroke-width="2"/><circle cx="${b[0]}" cy="${b[1]}" r="4.5" fill="${SK}" stroke="${K}" stroke-width="2"/>
+<circle cy="-15" r="11" fill="${SK}" stroke="${K}" stroke-width="2.5"/><circle cx="-4" cy="-15" r="1.6" fill="${K}"/><circle cx="4" cy="-15" r="1.6" fill="${K}"/><path d="M-4 -9q4 3 8 0" stroke="${K}" stroke-width="1.6" fill="none"/>
+${o.hat===0?`<path d="M-11 -17a11 11 0 0 1 22 0q-11-5-22 0z" fill="#4a3220" stroke="${K}" stroke-width="2"/>`:`<path d="M-12 -18a12 12 0 0 1 24 0z" fill="#ffd21f" stroke="${K}" stroke-width="2.5"/><rect x="-14" y="-19" width="28" height="4" rx="2" fill="#f0b400" stroke="${K}" stroke-width="2"/>`}${o.mask?`<rect x="-11" y="-26" width="22" height="20" rx="5" fill="#555" stroke="${K}" stroke-width="2.5"/><rect x="-8" y="-20" width="16" height="6" fill="#9bd7e8"/>`:''}${o.extra||''}</g>`};
+const box=(x,y,w,h,c='#c99a5c')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}" stroke="${K}" stroke-width="2.5"/><path d="M${x} ${y+h*.3}h${w}M${x+w/2} ${y}v${h*.3}" stroke="${K}" stroke-width="2"/>`;
+const rect=(x,y,w,h,f,t='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" stroke="${K}" stroke-width="2.5" ${t}/>`;
+const S=[
+{name:'Canteiro de obras',time:120,art:()=>{
+const rung=[0,1,2,3,4,5,6].map(i=>{const y=395-i*35,u=(395-y)/220;return `<path d="M${200-80*u} ${y}L${245-80*u} ${y}" stroke="${K}" stroke-width="5"/>`}).join('');
+return `<defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc3ee"/><stop offset="1" stop-color="#e3f3fb"/></linearGradient></defs>
+<rect width="800" height="450" fill="url(#a)"/>${rect(330,70,50,170,'#a9b6c6')}${rect(385,110,40,130,'#93a3b8')}${rect(430,50,46,190,'#b8c4d2')}
+${rect(300,235,190,135,'#b98a52')}<path d="M330 235v135M365 235v135M400 235v135M435 235v135M470 235v135" stroke="${K}" stroke-width="2"/>
+${rect(0,0,225,395,'#b9bfc6')}<path d="M0 130h225M0 260h225" stroke="#9aa2ac" stroke-width="2"/>
+${rect(25,55,88,118,'#7f8b99')}${rect(35,67,68,92,'#262b33')}<path d="M45 80h30M45 100h40M45 120h25M50 140h35" stroke="#e5484d" stroke-width="3"/><path d="M104 92l12-16M110 104l16-6M104 118l14 10" stroke="#ffd21f" stroke-width="4" stroke-linecap="round"/>
+${rect(0,385,800,65,'#97958f')}<path d="M0 405h800" stroke="#7d7b76" stroke-width="2"/>
+${rect(22,250,22,138,'#c98a43','transform="rotate(8 33 388)"')}
+${ol('M200 395L120 175',7,'#c98a43')}${ol('M245 395L165 175',7,'#c98a43')}${rung}
+${P(150,125,{h:[[-32,12],[-26,20]]})}${rect(106,130,24,10,'#2f7de1')}
+${[520,745].map(x=>ol(`M${x} 390V140`,7,'#7b8794')).join('')}${ol('M520 290L745 180M745 290L520 180',4,'#8e99a6')}
+${rect(497,176,275,11,'#c9a36a')}${rect(497,286,275,11,'#c9a36a')}${ol('M520 286V236M745 286V236M520 262H745M520 238H745',5,'#ffcc00')}
+${P(650,125,{h:[[-16,28],[18,28]],c:'#d9893b'})}
+${ol('M20 425q60-34 120 0t120 0',5,'#222')}
+${rect(655,410,105,14,'#c98a43','transform="rotate(-6 705 417)"')}<path d="M672 404v-14M693 402v-14M715 400v-14" stroke="#888" stroke-width="3.5" stroke-linecap="round"/>
+<ellipse cx="355" cy="402" rx="32" ry="10" fill="#0d0d0d" stroke="${K}" stroke-width="3"/>
+${P(420,290,{c:'#e8742a',h:[[-20,22],[20,22]]})}
+${P(625,330,{mask:1,c:'#8a5a2b',h:[[30,28],[36,36]]})}<path d="M670 358l16-8M672 366l20 2M668 372l14 10" stroke="#ffd21f" stroke-width="3.5" stroke-linecap="round"/>
+${rect(722,330,34,42,'#d62c2c')}<rect x="730" y="322" width="14" height="9" fill="#333" stroke="${K}" stroke-width="2"/>`},
+items:[
+{x:75,y:115,t:'Painel elétrico aberto com faíscas',nr:'NR-10',d:'Trabalho em painel energizado exige desenergização, bloqueio, EPI isolante e profissional autorizado. Faíscas indicam choque e arco elétrico iminentes.'},
+{x:190,y:310,t:'Escada improvisada e instável',nr:'NR-18',d:'Escadas devem estar firmes, no ângulo certo e ultrapassar o apoio em 1 metro. Trabalhar em escada com ferramenta elétrica aumenta o risco de queda.'},
+{x:650,y:135,t:'Andaime sem guarda-corpo',nr:'NR-35',d:'Em altura, plataformas exigem guarda-corpo e rodapé, e o trabalhador deve usar cinto paraquedista ancorado.'},
+{x:355,y:402,t:'Abertura no piso sem proteção',nr:'NR-18',d:'Buracos e poços precisam de tampa resistente ou guarda-corpo e sinalização. Sem isso, a queda é questão de tempo.'},
+{x:739,y:350,t:'Galão de combustível ao lado da solda',nr:'NR-20 e NR-34',d:'Líquidos inflamáveis devem ficar longe de fagulhas e chamas. Solda em área com combustível exige permissão de trabalho a quente.'},
+{x:140,y:422,t:'Cabos espalhados no chão',nr:'NR-10',d:'Cabos no piso sofrem pisadas, perdem o isolamento e causam tropeços e choques. Devem ser suspensos ou protegidos.'},
+{x:700,y:415,t:'Madeira com pregos expostos',nr:'NR-18',d:'Pregos devem ser retirados ou dobrados e o material organizado. Perfurações causam ferimentos e tétano.'},
+{x:33,y:320,t:'Prancha encostada na parede',nr:'NR-18',d:'Materiais soltos e mal apoiados podem cair sobre quem passa. Devem ser armazenados em local próprio e travados.'},
+{x:630,y:285,t:'Guarda-corpo correto',nr:'NR-18',ok:1,d:'Esse está correto: guarda-corpo duplo com montantes firmes.'},
+{x:420,y:290,t:'Trabalhador com EPI',nr:'NR-6',ok:1,d:'Esse está correto: capacete e colete refletivo.'}
+]},
+{name:'Galpão industrial',time:120,art:()=>`
+<rect width="800" height="450" fill="#bcccc6"/>${rect(0,252,800,198,'#cfe3d3')}<path d="M0 252H800" stroke="${K}" stroke-width="3"/>
+<g stroke="#9bb5a4" stroke-width="2"><path d="M0 330H800M0 400H800M120 252L40 450M300 252L260 450M500 252L520 450M680 252L780 450"/></g>
+${rect(0,0,800,36,'#8fa19a')}${[100,260,420,580].map(x=>rect(x,52,100,36,'#a6d4e8')).join('')}
+${rect(310,100,62,152,'#c8362f')}${rect(318,108,46,18,'#2fbf71')}<text x="341" y="121" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">SAÍDA</text>
+${rect(438,92,58,48,'#fff')}<circle cx="467" cy="115" r="15" fill="none" stroke="#d62c2c" stroke-width="4"/><path d="M456 126L478 104" stroke="#d62c2c" stroke-width="4"/>
+${rect(520,70,96,70,'#f3f3ee')}<text x="568" y="90" text-anchor="middle" font-size="11" font-weight="800">NR-12</text><path d="M532 102h72M532 112h60M532 122h68" stroke="#999" stroke-width="3"/>
+${box(18,150,80,64)}${box(98,170,60,46,'#b9894c')}${box(40,106,64,44,'#d3a96d')}<g transform="rotate(12 130 150)">${box(105,118,52,48)}</g>${box(20,214,70,40)}
+<ellipse cx="200" cy="406" rx="72" ry="14" fill="#8fc7d1" stroke="#5aa0ae" stroke-width="2"/><ellipse cx="470" cy="408" rx="50" ry="10" fill="#8fc7d1" stroke="#5aa0ae" stroke-width="2"/>
+${ol('M500 440q70-60 140-14t110-20',5,'#222')}
+${ol('M312 396l36-12',6,'#7a5230')}${rect(340,372,24,14,'#777','transform="rotate(-18 352 379)"')}
+${P(110,200,{hat:0,c:'#4b7bb5',h:[[-22,28],[26,26]]})}<circle cx="136" cy="226" r="9" fill="#ffd21f" stroke="${K}" stroke-width="2.5"/>
+${P(262,205,{c:'#4b7bb5',h:[[-14,38],[14,38]]})}${box(232,235,60,44)}
+${P(480,195,{hat:0,c:'#4b7bb5',h:[[8,-10],[-8,24]]})}<path d="M494 -2" /><rect x="489" y="178" width="12" height="3" fill="#fff" stroke="${K}"/><path d="M505 172q-8-14 4-24t-3-26" stroke="#8d99a6" stroke-width="4" fill="none" opacity=".7"/>
+${P(615,195,{hat:0,c:'#c9532a',p:'#2d5a8c',h:[[28,52],[36,46]],extra:`<rect x="-8" y="-30" width="16" height="5" rx="2" fill="#333" stroke="${K}"/><path d="M-12 8q12 12 24 0" stroke="#ffc800" stroke-width="6" fill="none"/>`})}
+${rect(560,262,235,88,'#5d7a99')}${rect(560,254,235,12,'#9fb0c4')}<circle cx="700" cy="248" r="34" fill="#dfe4ea" stroke="${K}" stroke-width="3" stroke-dasharray="8 5"/><circle cx="700" cy="248" r="7" fill="#6b7381"/>${rect(580,282,22,22,'#e5484d')}`,
+items:[
+{x:112,y:215,t:'Capacete na mão, não na cabeça',nr:'NR-6',d:'EPI só protege se for usado. Capacete na mão não impede traumatismo por queda de objetos.'},
+{x:262,y:240,t:'Carga pesada sem técnica adequada',nr:'NR-17',d:'Carregar peso curvado e sozinho sobrecarrega a coluna. Use carrinho, empilhadeira ou divida a carga.'},
+{x:482,y:195,t:'Fumando em área proibida',nr:'NR-20 e NR-23',d:'Brasa perto de materiais inflamáveis pode causar incêndio e explosão. Fumar só em área indicada.'},
+{x:700,y:248,t:'Serra circular sem proteção',nr:'NR-12',d:'A lâmina deve ter proteção fixa ou móvel cobrindo a zona de corte. Exposta, ela provoca amputações.'},
+{x:615,y:178,t:'EPI usado de forma errada',nr:'NR-6',d:'Óculos na testa e protetor auricular no pescoço não protegem. Devem estar nos olhos e nos ouvidos durante a operação.'},
+{x:335,y:384,t:'Ferramenta largada no piso',nr:'NR-8',d:'Ferramentas devem ser guardadas. Largadas, causam tropeços, cortes e pisadas.'},
+{x:200,y:406,t:'Poças d’água no piso',nr:'NR-8',d:'Piso molhado exige sinalização e secagem imediata. Escorregões causam fraturas e traumas graves.'},
+{x:600,y:432,t:'Cabo elétrico solto no chão',nr:'NR-10',d:'Cabos expostos no piso perdem o isolamento e causam tropeços e choques, ainda mais perto de poças.'},
+{x:341,y:180,t:'Saída de emergência',nr:'NR-23',ok:1,d:'Esse está correto: porta sinalizada com acesso livre.'},
+{x:568,y:105,t:'Placa de segurança NR-12',nr:'NR-12',ok:1,d:'Esse está correto: sinalização de segurança da máquina visível.'}
+]}];
+let lv=0,found=new Set(),lives=3,hints=2,time=0,score=0,tm,run=false;
+const svg=$('svg'),ov=$('ov'),info=$('info'),sc=$('scene');
+const real=()=>S[lv].items.filter(i=>!i.ok);
+function show(h,c=''){info.className='info '+c;info.innerHTML=h}
+function hud(){if(mode==='catch')return chud();$('lT').textContent='Tempo';const n=real().length,f=[...found].filter(k=>!S[lv].items[k].ok).length;$('hLv').textContent=(ci+1)+'/'+CAMP.length;$('hSc').textContent=score;$('hT').textContent=time;$('hL').textContent='♥'.repeat(lives)+'♡'.repeat(3-lives);$('risk').style.clipPath=`inset(0 ${100*f/n}% 0 0)`;$('bHint').textContent='Dica ('+hints+')';$('bHint').disabled=hints<1||!run;$('cap').textContent=`Você encontrou ${f} de ${n} erros`;
+let j=0;$('chips').innerHTML=S[lv].items.map((it,k)=>it.ok?'':`<div class="chip ${found.has(k)?'on':''}"><b>${++j}</b><span>${found.has(k)?it.t:'Erro não encontrado'}</span></div>`).join('')}
+function load(i){mode='err';cr=false;cancelAnimationFrame(craf);cv.style.display='none';svg.style.display='';lv=i;const L=S[lv];found=new Set();lives=3;hints=2;time=L.time;run=true;
+svg.innerHTML=L.art()+L.items.map((it,k)=>`<circle class="hit" data-k="${k}" cx="${it.x}" cy="${it.y}" r="34"/>`).join('')+'<g id="mk"></g>';
+ov.style.display='none';sc.classList.remove('ovon');show(`<h2>${L.name}</h2><p>Encontre ${real().length} irregularidades. Nem tudo no cenário está errado.</p>`);
+clearInterval(tm);tm=setInterval(()=>{if(!run)return;time--;if(time<=0){time=0;end(false)}hud()},1000);hud()}
+function mark(it,c,t){$('mk').insertAdjacentHTML('beforeend',`<g><circle cx="${it.x}" cy="${it.y}" r="30" fill="${c}" fill-opacity=".2" stroke="${c}" stroke-width="5"/><text x="${it.x}" y="${it.y+10}" text-anchor="middle" font-size="30" font-weight="800" fill="${c}">${t}</text></g>`)}
+svg.addEventListener('click',e=>{if(!run)return;const h=e.target.closest('.hit');
+if(!h){time=Math.max(1,time-3);show('<h2>Nada de errado aqui</h2><p>Clicar às cegas custa 3 segundos. Observe os detalhes.</p>','bad');hud();return}
+const k=+h.dataset.k,it=S[lv].items[k];if(found.has(k))return;found.add(k);if(it.ok)sfx(150,.3,'square',.1);else{sfx(660,.08,'square',.08);setTimeout(()=>sfx(880,.14,'square',.08),90)}
+if(it.ok){lives--;mark(it,'#e5484d','✕');show(`<h2>${it.t}</h2><p><span class="nr">${it.nr}</span>${it.d} Você perdeu uma vida.</p>`,'bad');sc.classList.remove('shake');void sc.offsetWidth;sc.classList.add('shake');if(lives<=0){hud();end(false);return}}
+else{score+=100+time;mark(it,'#2fbf71','✓');show(`<h2>${it.t}</h2><p><span class="nr">${it.nr}</span>${it.d}</p>`,'good')}
+hud();if(S[lv].items.every((x,i)=>x.ok||found.has(i)))end(true)});
+$('bHint').onclick=()=>{if(!run||hints<1)return;const k=S[lv].items.findIndex((x,i)=>!x.ok&&!found.has(i));if(k<0)return;hints--;score=Math.max(0,score-50);const it=S[lv].items[k];svg.insertAdjacentHTML('beforeend',`<circle class="pulse" cx="${it.x}" cy="${it.y}" r="52" fill="none" stroke="#ffcc00" stroke-width="4" pointer-events="none"/>`);hud()};
+$('bSkip').onclick=()=>load(lv);
+function end(win){run=false;clearInterval(tm);if(!win)S[lv].items.forEach((it,k)=>{if(!it.ok&&!found.has(k))mark(it,'#ff9f1c','!')});hud();
+const last=lv===S.length-1,st=win?(lives===3?3:lives===2?2:1):0;
+ov.style.display='flex';sc.classList.add('ovon');
+ov.innerHTML=win?`<div class="stars">${'★'.repeat(st)+'☆'.repeat(3-st)}</div><h1>${last?'Inspeção concluída':'Área segura'}</h1><p>${last?`Você terminou com ${score} pontos. Lembre-se: todo trabalhador tem direito de recusar uma tarefa de risco grave e iminente.`:`Todos os riscos identificados. Pontos: ${score}.`}</p><button id="nx">${last?'Jogar de novo':'Próxima fase'}</button>`
+:`<h1>Interdição</h1><p>${time<=0?'O tempo acabou.':'Você apontou itens corretos demais.'} Os riscos marcados com ! ficaram no local. Tente de novo.</p><button id="nx">Tentar de novo</button>`;
+$('nx').onclick=()=>{if(win&&last){score=0;load(0)}else load(win?lv+1:lv)}}
+let AC,mg,mOn=true,mT,mS=0;
+function note(f,t,d,ty,v){const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(mg);o.start(t);o.stop(t+d)}
+function sfx(f,d,ty,v){if(!AC||!mOn)return;note(f,AC.currentTime,d,ty,v)}
+const MN=m=>440*2**((m-69)/12),CH=[48,45,41,43],ML=[[76,0,79,0,84,0,79,76],[81,0,76,0,72,0,76,81],[77,0,81,0,84,0,81,77],[79,0,83,0,86,84,83,79]];
+function beep(f,d,ty,v){note(f,AC.currentTime,d,ty,v)}
+function mstep(){if(AC&&mOn&&!document.hidden){const i=mS%32,bar=i>>3,s=i&7,r=CH[bar],n=ML[bar][s];if(n)beep(MN(n),.16,'square',.03);if(s%2==0)beep(MN(r+(s==2?12:s==6?7:0)),.15,'triangle',.07);else beep(MN(r+24+[0,bar==1?3:4,7,bar==1?3:4][s>>1]),.1,'square',.012);mS++}mT=setTimeout(mstep,190)}
+function music(){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();mg=AC.createGain();mg.gain.value=1;mg.connect(AC.destination)}
+if(AC.state==='suspended')AC.resume();if(!mT)mstep()}
+addEventListener('keydown',e=>{if(e.key==='m'||e.key==='M')$('bMus').click()});
+$('bMus').onclick=()=>{mOn=!mOn;$('bMus').textContent=mOn?'♪ Música (M)':'♪ Mudo (M)';if(mOn)music()};
+/* ===== mais fases de erros ===== */
+const ext=(x,y)=>rect(x,y,16,42,'#d62c2c')+rect(x+4,y-8,8,9,'#333');
+const sgn=(x,y,w,t,c='#2fbf71')=>rect(x,y,w,16,c)+`<text x="${x+w/2}" y="${y+12}" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">${t}</text>`;
+S.push({name:'Escritório',time:110,art:()=>`
+${rect(0,0,800,290,'#dfe5ec')}${rect(0,290,800,160,'#b99f82')}<path d="M0 360H800M0 420H800" stroke="#9c8366" stroke-width="2"/>
+${rect(20,110,92,180,'#c8362f')}${sgn(30,118,72,'SAÍDA')}${box(20,236,62,54)}${box(72,254,50,36,'#b9894c')}${box(34,196,56,40,'#d3a96d')}
+${rect(150,128,46,40,'#fff')}<path d="M173 134v28M159 148h28" stroke="#d62c2c" stroke-width="7"/>
+${sgn(240,118,36,'EXT')}${ext(250,134)}
+${rect(300,190,56,110,'#8e99a6')}${rect(304,200,48,10,'#aab4c0')}${rect(304,250,48,10,'#aab4c0')}${rect(356,206,40,24,'#aab4c0')}${rect(356,256,40,24,'#aab4c0')}
+${rect(380,90,110,8,'#8a6a40')}${rect(392,70,16,20,'#e5484d')}${rect(412,66,14,24,'#2f7de1')}${rect(430,72,18,18,'#ffd21f')}
+${ol('M440 270V232',5,'#333')}${rect(410,224,60,12,'#4a5568')}${ol('M415 274H465M420 280l-8 6M460 280l8 6',4,'#222')}${P(440,168,{h:[[-22,-14],[22,-14]],c:'#7385a8'})}
+${rect(520,236,250,14,'#8a6a40')}${rect(530,250,12,50,'#6e5230')}${rect(748,250,12,50,'#6e5230')}${rect(600,216,52,22,'#222')}${P(565,185,{h:[[24,50],[30,50]],c:'#7385a8'})}
+${ext(735,120)}${box(708,166,70,36)}${box(700,202,80,34,'#b9894c')}
+${rect(660,400,90,12,'#eee')}${[670,690,710,730].map(x=>rect(x,395,8,6,'#333')).join('')}${ol('M674 402q-30 20-60 6M694 402q20 20 40 4M714 402q10 25 30 22',3,'#222')}<path d="M752 392l10-12M758 400l14-4" stroke="#ffd21f" stroke-width="3"/>
+${ol('M300 425q60-26 120 0t120 0',5,'#222')}<ellipse cx="230" cy="395" rx="64" ry="12" fill="#8fc7d1" stroke="#5aa0ae" stroke-width="2"/>`,
+items:[
+{x:65,y:236,t:'Saída de emergência bloqueada',nr:'NR-23',d:'Rotas de fuga devem estar sempre livres e sinalizadas. Caixas na porta podem custar vidas numa emergência.'},
+{x:340,y:250,t:'Gavetas abertas do arquivo',nr:'NR-17',d:'Várias gavetas abertas desequilibram o móvel e causam tombamento e tropeços. Abra uma por vez.'},
+{x:440,y:165,t:'Em pé sobre cadeira giratória',nr:'NR-35',d:'Cadeira com rodas não é apoio seguro. Use escada ou banqueta adequada para alcançar locais altos.'},
+{x:565,y:190,t:'Postura ruim e monitor baixo',nr:'NR-17',d:'Monitor na altura dos olhos e coluna apoiada previnem lesões por esforço repetitivo.'},
+{x:743,y:160,t:'Extintor bloqueado por caixas',nr:'NR-23',d:'Extintores precisam de acesso livre e sinalização. Segundos perdidos decidem um incêndio.'},
+{x:705,y:402,t:'Tomada sobrecarregada',nr:'NR-10',d:'Muitos aparelhos numa só tomada superaquecem e causam incêndio. Use circuitos dimensionados.'},
+{x:420,y:425,t:'Cabo atravessando o corredor',nr:'NR-10',d:'Cabos no piso causam tropeços e perdem o isolamento. Devem ser canalizados ou protegidos.'},
+{x:230,y:395,t:'Piso molhado sem sinalização',nr:'NR-8',d:'Piso molhado exige placa e secagem imediata. Escorregões causam fraturas.'},
+{x:258,y:150,t:'Extintor sinalizado',nr:'NR-23',ok:1,d:'Esse está correto: visível, sinalizado e livre.'},
+{x:173,y:148,t:'Kit de primeiros socorros',nr:'NR-7',ok:1,d:'Esse está correto: kit visível e acessível.'}]});
+S.push({name:'Armazém logístico',time:110,art:()=>`
+${rect(0,0,800,300,'#c3cdd6')}${rect(0,300,800,150,'#9aa4ad')}<path d="M0 300H800" stroke="${K}" stroke-width="3"/>
+${rect(20,418,260,12,'#ffcc00')}<path d="M40 418l16 12M80 418l16 12M120 418l16 12M160 418l16 12M200 418l16 12M240 418l16 12" stroke="#111" stroke-width="5"/>
+${rect(40,262,112,48,'#f4b92f')}${rect(60,226,60,38,'#f4b92f')}${rect(68,234,44,22,'#9bd7e8')}${rect(150,130,10,182,'#6b7381')}${rect(158,208,52,7,'#6b7381')}<circle cx="70" cy="316" r="16" fill="#222" stroke="${K}" stroke-width="3"/><circle cx="130" cy="316" r="14" fill="#222" stroke="${K}" stroke-width="3"/>${P(185,152,{h:[[-18,30],[18,30]]})}
+<path d="M400 0V92" stroke="#333" stroke-width="4"/>${box(368,92,64,50)}${P(400,232,{})}
+${[560,770].map(x=>rect(x,100,10,200,'#2f7de1')).join('')}${[120,200,280].map(y=>rect(560,y,220,8,'#e5873a')).join('')}${box(580,76,50,44)}<g transform="rotate(20 690 120)">${box(660,76,60,44)}</g>${box(584,156,56,44)}${box(660,164,50,36)}${box(600,236,60,44)}${box(700,244,50,36)}
+${rect(290,392,90,10,'#a67842')}${box(298,350,74,42)}${rect(360,410,80,10,'#a67842')}${box(370,372,60,38,'#b9894c')}
+${P(255,262,{c:'#6b7385',nb:1})}${P(625,332,{})}
+${rect(710,330,44,60,'#2f7de1')}<ellipse cx="732" cy="332" rx="22" ry="6" fill="#4a90e2" stroke="${K}" stroke-width="2"/><ellipse cx="740" cy="404" rx="52" ry="10" fill="#6bd16b" opacity=".7"/>
+<path d="M470 400l20 14-10 8 24 14" stroke="#222" stroke-width="4" fill="none"/><ellipse cx="486" cy="416" rx="22" ry="7" fill="#111"/>`,
+items:[
+{x:185,y:165,t:'Pessoa sobre os garfos da empilhadeira',nr:'NR-11',d:'É proibido transportar pessoas nos garfos. Para trabalho em altura use plataforma própria homologada.'},
+{x:700,y:100,t:'Caixa tombando da prateleira',nr:'NR-11',d:'Cargas devem ficar dentro do limite do porta-pallet, niveladas e estáveis.'},
+{x:400,y:150,t:'Pessoa sob carga suspensa',nr:'NR-11',d:'Ninguém deve passar ou permanecer sob carga içada. Isole e sinalize a área.'},
+{x:340,y:395,t:'Corredor obstruído por paletes',nr:'NR-23',d:'Vias de circulação devem estar livres. Paletes no caminho bloqueiam fuga e causam acidentes.'},
+{x:255,y:262,t:'Sem colete perto da empilhadeira',nr:'NR-6',d:'Em áreas com veículos, colete refletivo e capacete tornam o trabalhador visível.'},
+{x:732,y:370,t:'Barril vazando',nr:'NR-26',d:'Vazamentos exigem isolamento, sinalização e contenção. Produtos químicos precisam de armazenamento adequado.'},
+{x:486,y:414,t:'Piso quebrado',nr:'NR-8',d:'Pisos danificados causam quedas e tombamento de equipamentos. Devem ser reparados e sinalizados.'},
+{x:625,y:330,t:'Operador com EPI completo',nr:'NR-6',ok:1,d:'Esse está correto: capacete e colete refletivo.'},
+{x:120,y:424,t:'Faixa de pedestres',nr:'NR-26',ok:1,d:'Esse está correto: faixa de sinalização do piso bem visível.'}]});
+S.push({name:'Laboratório químico',time:110,art:()=>`
+${rect(0,0,800,300,'#d6e4e8')}${rect(0,300,800,150,'#c9d6d2')}<path d="M0 300H800" stroke="${K}" stroke-width="3"/>
+<g transform="rotate(8 60 300)">${rect(40,230,38,110,'#3f7fbf')}${rect(50,218,18,14,'#555')}</g>
+${rect(140,200,52,100,'#2fbf71')}${sgn(140,184,52,'LAVA-OLHOS','#2f7de1')}${box(120,270,70,45)}${box(150,236,55,38,'#b9894c')}
+${rect(240,120,40,84,'#ffc800')}${sgn(236,100,48,'CHUVEIRO','#2fbf71')}
+${rect(330,262,300,16,'#6b7381')}${rect(340,278,14,60,'#555')}${rect(606,278,14,60,'#555')}
+${rect(370,232,10,30,'#444')}<path d="M375 232q-8-14 0-24q8 12 0 24" fill="#ff9f1c" stroke="${K}" stroke-width="2"/>${rect(398,226,30,36,'#d62c2c')}<text x="413" y="248" text-anchor="middle" font-size="7" font-weight="800" fill="#fff">INFLAM.</text>
+<ellipse cx="500" cy="258" rx="14" ry="5" fill="#fff" stroke="${K}" stroke-width="2"/>${rect(488,240,18,10,'#e5a400')}
+${rect(440,112,120,6,'#8a6a40')}${[450,472,494,516,538].map((x,i)=>rect(x,86,14,26,i==2?'#cfe3ea':'#e8f3ff')+(i==2?'':rect(x+2,94,10,8,'#fff'))).join('')}
+${P(580,215,{hat:0,c:'#4b7bb5'})}${rect(560,238,24,22,'#7fe06a')}
+${P(720,225,{hat:0,c:'#fafafa',extra:`<rect x="-8" y="-18" width="16" height="5" rx="2" fill="#9bd7e8" stroke="${K}"/>`})}
+<ellipse cx="680" cy="400" rx="56" ry="12" fill="#6bd16b" opacity=".75" stroke="#3d9c3d" stroke-width="2"/>${rect(640,386,28,12,'#cfe3ea','transform="rotate(-12 654 392)"')}`,
+items:[
+{x:60,y:290,t:'Cilindro de gás sem fixação',nr:'NR-13',d:'Cilindros devem ficar presos em suporte, em pé e com capacete de proteção, para não tombar.'},
+{x:165,y:250,t:'Lava-olhos bloqueado',nr:'NR-32',d:'O equipamento de emergência precisa de acesso livre e imediato. Segundos importam em respingos.'},
+{x:395,y:240,t:'Chama aberta junto a inflamável',nr:'NR-20',d:'Líquidos inflamáveis devem ficar longe de chamas e faíscas, em armário próprio.'},
+{x:500,y:245,t:'Alimento na bancada do laboratório',nr:'NR-32',d:'Proibido comer, beber ou guardar alimentos em áreas com agentes químicos ou biológicos.'},
+{x:580,y:200,t:'Manuseio de químico sem EPI',nr:'NR-6',d:'Jaleco, luvas e óculos de proteção são obrigatórios ao manipular reagentes.'},
+{x:494,y:100,t:'Frasco sem rótulo',nr:'NR-26',d:'Todo produto químico precisa de identificação. Frasco sem rótulo é um risco desconhecido.'},
+{x:680,y:400,t:'Derramamento sem sinalização',nr:'NR-26',d:'Derrames exigem isolamento, sinalização e limpeza com procedimento e EPI adequados.'},
+{x:720,y:218,t:'Pesquisador com EPI',nr:'NR-6',ok:1,d:'Esse está correto: jaleco e óculos de proteção.'},
+{x:260,y:150,t:'Chuveiro de emergência',nr:'NR-32',ok:1,d:'Esse está correto: sinalizado e desobstruído.'}]});
+/* ===== chuva de EPIs ===== */
+const CAMP=[{t:'err',i:0},{t:'catch',n:0},{t:'err',i:1},{t:'catch',n:1},{t:'err',i:2},{t:'catch',n:2},{t:'err',i:3},{t:'catch',n:3},{t:'err',i:4},{t:'catch',n:4}];
+let ci=0,mode='err',cr=false,craf,clast=0,tgt=400,cl,cn=0,C={it:[],fx:[],kit:new Set(),got:0,x:400,hat:false,inv:0,sp:0,t:0};
+const cv=$('cv'),cx=cv.getContext('2d'),ck={};
+const CL=[{n:'Almoxarifado',goal:8,spd:140,rate:.95,bad:.3,bg:['#1d3a4f','#0e1f2e']},{n:'Canteiro',goal:10,spd:175,rate:.8,bad:.36,bg:['#3b4f7a','#16213a']},{n:'Fábrica',goal:12,spd:205,rate:.7,bad:.4,bg:['#4a3a52','#1c1426']},{n:'Altura',goal:14,spd:235,rate:.62,bad:.44,bg:['#2d5a6b','#0f2430']},{n:'Tempestade',goal:16,spd:270,rate:.52,bad:.5,bg:['#2a2f45','#0a0c18']}];
+const GOOD=[['⛑️','Capacete','NR-6','Protege a cabeça contra queda de objetos e impactos.'],['🧤','Luvas','NR-6','Protegem as mãos de cortes, calor e produtos químicos.'],['🥽','Óculos','NR-6','Protegem os olhos de estilhaços, poeira e respingos.'],['🦺','Colete','NR-18','Deixa o trabalhador visível perto de máquinas e veículos.'],['🎧','Protetor auricular','NR-6','Reduz o ruído e previne a perda auditiva.'],['🧯','Extintor','NR-23','Combate princípio de incêndio e precisa estar sempre acessível.']];
+const BAD=[['🧱','Tijolo','NR-18','Materiais soltos em altura ferem quem está embaixo. Use rede de proteção e isole a área.'],['☣️','Produto perigoso','NR-26','Produtos químicos exigem rótulo, armazenamento correto e EPI.'],['🔨','Ferramenta solta','NR-18','Ferramentas devem ficar presas ou guardadas, nunca soltas em altura.'],['🔩','Peça metálica solta','NR-18','Peças e parafusos soltos caem e ferem. Mantenha tudo preso e organizado.']];
+const WI=h=>{const i=new Image();i.src='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-34 -36 68 96" width="136" height="192">${P(0,0,{hat:h?1:0,c:'#e8742a',h:[[-22,12],[22,12]]})}</svg>`);return i};
+const W0=WI(0),W1=WI(1);
+function chud(){$('hLv').textContent=(ci+1)+'/'+CAMP.length;$('hSc').textContent=score;$('lT').textContent='Meta';$('hT').textContent=C.got+'/'+cl.goal;$('hL').textContent='♥'.repeat(lives)+'♡'.repeat(3-lives);$('risk').style.clipPath=`inset(0 ${100*Math.min(1,C.got/cl.goal)}% 0 0)`;$('bHint').disabled=true;$('bHint').textContent='Dica (—)';$('cap').textContent='Chuva de EPIs · '+cl.n;
+$('chips').innerHTML=GOOD.map((d,k)=>`<div class="chip ${C.kit.has(k)?'on':''}"><b>${d[0]}</b><span>${C.kit.has(k)?d[1]:'?'}</span></div>`).join('')}
+function catchStart(n){mode='catch';clearInterval(tm);run=false;cn=n;cl=CL[n];lives=3;C={it:[],fx:[],kit:new Set(),got:0,x:400,hat:false,inv:0,sp:1.2,t:0};tgt=400;cr=true;svg.style.display='none';cv.style.display='block';ov.style.display='none';sc.classList.remove('ovon');
+show(`<h2>Chuva de EPIs: ${cl.n}</h2><p>Pegue <b>${cl.goal}</b> EPIs ✔ e desvie de tijolos e produtos perigosos ✖. Capture o <b>capacete</b> para absorver 1 impacto. Setas ou arraste para mover.</p>`);
+chud();cancelAnimationFrame(craf);clast=performance.now();craf=requestAnimationFrame(cloop)}
+function hit(o){const d=(o.bad?BAD:GOOD)[o.k];
+if(!o.bad){C.got++;score+=50;C.kit.add(o.k);if(o.k==0)C.hat=true;let x='';if(o.k==0)x=' Capacete colocado: ele absorve 1 impacto!';if(o.k==5&&lives<3){lives++;x=' +1 vida!'}
+sfx(660,.08,'square',.08);setTimeout(()=>sfx(990,.12,'square',.08),80);C.fx.push({x:o.x,y:o.y,t:.9,s:'+50',c:'#7ff0d0'});burst(o.x,o.y,'#7ff0d0');show(`<h2>${d[0]} ${d[1]}</h2><p><span class="nr">${d[2]}</span>${d[3]}${x}</p>`,'good');chud();if(C.got>=cl.goal)end(true)}
+else if(C.inv>0){}
+else if(C.hat){C.hat=false;C.inv=1;sfx(220,.15,'square',.1);C.fx.push({x:C.x,y:360,t:1,s:'CAPACETE!',c:'#7fd1ff'});burst(C.x,370,'#7fd1ff');show(`<h2>O capacete te salvou!</h2><p><span class="nr">NR-6</span>${d[0]} ${d[1]}: ${d[3]} O capacete absorveu o impacto, mas pegue outro.</p>`,'good');chud()}
+else{lives--;C.inv=1.4;sfx(110,.3,'sawtooth',.12);sc.classList.remove('shake');void sc.offsetWidth;sc.classList.add('shake');C.fx.push({x:C.x,y:360,t:1,s:'AI!',c:'#e23b3b'});burst(C.x,380,'#e23b3b');show(`<h2>${d[0]} ${d[1]}</h2><p><span class="nr">${d[2]}</span>${d[3]} Você perdeu uma vida.</p>`,'bad');chud();if(lives<=0)end(false)}}
+function burst(x,y,c){C.pt=C.pt||[];for(let i=0;i<14;i++){const a=Math.random()*6.28,s=80+Math.random()*180;C.pt.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-120,l:.6+Math.random()*.4,c})}}
+function cloop(ts){if(!cr)return;const dt=Math.min(.05,(ts-clast)/1000);clast=ts;
+if(ck.ArrowLeft||ck.a)tgt-=480*dt;if(ck.ArrowRight||ck.d)tgt+=480*dt;tgt=Math.max(40,Math.min(760,tgt));C.x+=(tgt-C.x)*Math.min(1,dt*16);C.t+=dt;C.sp-=dt;C.inv=Math.max(0,C.inv-dt);
+if(C.sp<=0){C.sp=cl.rate*(.7+Math.random()*.6);const bad=Math.random()<cl.bad,a=bad?BAD:GOOD;C.it.push({x:50+Math.random()*700,y:-30,v:cl.spd*(.8+Math.random()*.5),k:Math.random()*a.length|0,bad,w:Math.random()*6})}
+for(const o of C.it){o.y+=o.v*dt;o.w+=dt*3;if(!o.dead&&cr&&Math.abs(o.x-C.x)<40&&o.y>335&&o.y<430){o.dead=1;hit(o)}}
+C.it=C.it.filter(o=>!o.dead&&o.y<480);C.fx=C.fx.filter(f=>(f.t-=dt)>0);C.pt=(C.pt||[]).filter(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=600*dt;return(p.l-=dt)>0});cdraw();if(cr)craf=requestAnimationFrame(cloop)}
+function cdraw(){const g=cx,gr=g.createLinearGradient(0,0,0,450);gr.addColorStop(0,cl.bg[0]);gr.addColorStop(1,cl.bg[1]);g.fillStyle=gr;g.fillRect(0,0,800,450);
+const mg2=g.createRadialGradient(660,90,5,660,90,130);mg2.addColorStop(0,'rgba(255,240,200,.5)');mg2.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=mg2;g.fillRect(520,0,280,240);g.fillStyle='#fff4d6';g.beginPath();g.arc(660,90,20,0,7);g.fill();
+g.fillStyle='rgba(255,255,255,.55)';for(let i=0;i<36;i++)g.fillRect((i*97)%800,(i*53)%240,2,2);
+for(let L=0;L<2;L++)for(let i=0;i<12;i++){const w=64+((i*37)%46),hh=(L?100:165)+((i*53+L*29)%100),x=((i*85-C.t*(5+L*10))%1020+1020)%1020-110;g.fillStyle=L?'rgba(10,20,34,.55)':'rgba(180,210,235,.09)';g.fillRect(x,432-hh,w,hh);g.fillStyle=L?'rgba(255,228,92,.5)':'rgba(255,228,92,.18)';for(let r=0;r<hh/22-1;r++)for(let c=0;c<w/18-1;c++)if((i*7+r*3+c*5)%4==0)g.fillRect(x+8+c*18,432-hh+10+r*22,7,9)}
+if(cn==4){g.strokeStyle='rgba(180,220,255,.35)';g.lineWidth=2;for(let i=0;i<40;i++){const x=(i*47+C.t*90)%800,y=(i*91+C.t*600)%450;g.beginPath();g.moveTo(x,y);g.lineTo(x-6,y+22);g.stroke()}}
+const fg=g.createLinearGradient(0,432,0,450);fg.addColorStop(0,'#3a4658');fg.addColorStop(1,'#1c2330');g.fillStyle=fg;g.fillRect(0,432,800,18);for(let i=0;i<20;i++){g.fillStyle=i%2?'#ffe45c':'#111';g.fillRect(i*40,432,40,6)}g.fillStyle='rgba(255,255,255,.25)';g.fillRect(0,432,800,1);
+g.fillStyle='rgba(0,0,0,.6)';g.fillRect(20,14,760,16);g.fillStyle='#7ff0d0';g.fillRect(23,17,754*Math.min(1,C.got/cl.goal),10);
+g.font='34px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';
+for(const o of C.it){const gd=!o.bad;g.save();g.translate(o.x,o.y);g.strokeStyle=gd?'rgba(127,240,208,.28)':'rgba(255,80,80,.3)';g.lineWidth=4;g.lineCap='round';g.beginPath();g.moveTo(-7,-34);g.lineTo(-7,-62);g.moveTo(7,-30);g.lineTo(7,-52);g.stroke();
+g.rotate(Math.sin(o.w)*.22);g.shadowColor=gd?'#7ff0d0':'#ff3b3b';g.shadowBlur=gd?20:24;g.font='46px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';g.fillText((gd?GOOD:BAD)[o.k][0],0,3);g.shadowBlur=0;g.restore();
+if(o.bad){g.fillStyle='#ffcc00';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.moveTo(o.x+22,o.y-34);g.lineTo(o.x+34,o.y-12);g.lineTo(o.x+10,o.y-12);g.closePath();g.fill();g.stroke();g.fillStyle='#000';g.font='10px "Press Start 2P",monospace';g.fillText('!',o.x+22,o.y-17)}else{g.fillStyle='#7ff0d0';g.font='14px sans-serif';g.fillText('✦',o.x+26,o.y-24+Math.sin(o.w*2)*3)}}
+g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(C.x,436,32,7,0,0,7);g.fill();
+if(!(C.inv>0&&((C.inv*12)|0)%2)){g.drawImage(C.hat?W1:W0,C.x-45,318,90,125)}
+if(C.hat){g.strokeStyle='rgba(127,209,255,.8)';g.lineWidth=3;g.beginPath();g.arc(C.x,380,64,0,7);g.stroke()}
+for(const p of C.pt||[]){g.globalAlpha=Math.max(0,p.l*1.6);g.fillStyle=p.c;g.fillRect(p.x,p.y,5,5)}g.globalAlpha=1;g.font='12px "Press Start 2P",monospace';g.textBaseline='alphabetic';for(const f of C.fx){g.fillStyle='#000';g.fillText(f.s,f.x+2,f.y-(1-f.t)*40+2);g.fillStyle=f.c;g.fillText(f.s,f.x,f.y-(1-f.t)*40)}}
+const mv=e=>{const r=cv.getBoundingClientRect();tgt=(e.clientX-r.left)/r.width*800};
+cv.addEventListener('pointerdown',e=>{music();mv(e)});cv.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='mouse')mv(e)});
+addEventListener('keydown',e=>{ck[e.key]=1;if(cr&&e.key.startsWith('Arrow'))e.preventDefault()});addEventListener('keyup',e=>{ck[e.key]=0});
+function startC(i){ci=i;const c=CAMP[i];c.t==='err'?load(c.i):catchStart(c.n)}
+function end(win){run=false;cr=false;cancelAnimationFrame(craf);clearInterval(tm);if(!win&&mode==='err')S[lv].items.forEach((it,k)=>{if(!it.ok&&!found.has(k))mark(it,'#ff9f1c','!')});hud();
+const last=ci===CAMP.length-1,st=win?(lives===3?3:lives===2?2:1):0,nx=CAMP[ci+1];
+ov.style.display='flex';sc.classList.add('ovon');
+ov.innerHTML=win?`<div class="stars">${'★'.repeat(st)+'☆'.repeat(3-st)}</div><h1>${last?'Campanha concluída':'Fase concluída'}</h1><p>${last?`Você terminou com ${score} pontos. Lembre-se: todo trabalhador tem direito de recusar uma tarefa de risco grave e iminente.`:`Pontos: ${score}. Próxima fase: ${nx.t==='err'?'inspeção de '+S[nx.i].name:'chuva de EPIs'}.`}</p><button id="nx">${last?'Jogar de novo':'Próxima fase'}</button>`
+:`<h1>${mode==='catch'?'Que pancada!':'Interdição'}</h1><p>${mode==='catch'?'Você levou pancadas demais. Pegue o capacete e desvie do que cai.':(time<=0?'O tempo acabou.':'Você apontou itens corretos demais.')+' Os riscos marcados com ! ficaram no local.'} Tente de novo.</p><button id="nx">Tentar de novo</button>`;
+$('nx').onclick=()=>{if(win&&last){score=0;startC(0)}else startC(win?ci+1:ci)}}
+$('bSkip').onclick=()=>startC(ci);
+ov.innerHTML=`<div class="fl"><span>⛑️</span><span>🧤</span><span>🥽</span><span>🦺</span><span>🧯</span></div><h1>Inspetor de<br>Segurança</h1><p>Campanha de 10 fases: ache os erros nas inspeções e pegue EPIs na chuva de materiais, desviando de tijolos e produtos perigosos.</p><button id="go">Iniciar campanha</button><p class="mini">← → ou arraste para mover · M = música</p>`;
+$('go').onclick=()=>{score=0;music();startC(0)};
+time=S[0].time;hud();
+</script>
+</body>
+</html>
